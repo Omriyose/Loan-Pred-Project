@@ -3,6 +3,12 @@ import joblib
 import pandas as pd
 import numpy as np
 from pathlib import Path
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)s %(message)s",
+)
 
 BASE_DIR = Path(__file__).parent
 MODEL_PATH = BASE_DIR / "loan_model.joblib"
@@ -10,8 +16,9 @@ INFO_PATH = BASE_DIR / "model_info.json"
 
 try:
     pipeline = joblib.load(MODEL_PATH)
+    logging.info("Model Loaded")
 except FileNotFoundError:
-    print("Load Failed: File not found")
+    logging.warning("Load Failed: File not found")
     pipeline = None
 
 def get_model_info():
@@ -19,7 +26,8 @@ def get_model_info():
     try:
         with open(INFO_PATH, "r") as f:
             return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
+    except (FileNotFoundError, json.JSONDecodeError) as err:
+        logging.warning("Could not load model info: %s", err)
         return None
     
 info = get_model_info()
