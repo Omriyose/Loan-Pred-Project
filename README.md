@@ -1,4 +1,4 @@
-# Loan-Pred-Project
+# Loan Prediction Project
 
 ## Finding 
 The model seems to rely mostly on Credit History
