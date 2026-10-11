@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Loan Eligibility Dashboard</title>
+
+  <!-- Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <!-- Decorative background blobs that sit behind the glass cards -->
+  <div class="bg-blob blob-1" aria-hidden="true"></div>
+  <div class="bg-blob blob-2" aria-hidden="true"></div>
+  <div class="bg-blob blob-3" aria-hidden="true"></div>
+
+  <!-- Loading state, shown while /api/check is in flight -->
+  <div id="loading-screen" class="center-screen">
+    <div class="spinner" aria-label="Loading"></div>
+  </div>
+
+  <!-- Shown when the model is not ready or /api/check fails -->
+  <div id="not-ready-screen" class="center-screen hidden">
+    <div class="glass not-ready-card">
+      <div class="not-ready-icon" aria-hidden="true">!</div>
+      <p>Model file not found. Please train the model and save it before running the app.</p>
+    </div>
+  </div>
+
+  <!-- Main dashboard -->
+  <main id="dashboard" class="dashboard hidden">
+    <header class="page-header">
+      <h1>Loan Eligibility Dashboard</h1>
+      <p class="subtitle">Performance and live predictions from the trained scikit-learn model</p>
+    </header>
+
+    <!-- 1. Metric cards -->
+    <section class="metrics-row" id="metrics-row" aria-label="Model metrics"></section>
+
+    <div class="grid">
+      <!-- 2. Confusion matrix -->
+      <section class="glass card" id="confusion-card">
+        <h2>Confusion Matrix</h2>
+        <p class="card-hint">Rows = actual, columns = predicted. Y is the positive class.</p>
+        <div class="cm-wrapper">
+          <div class="cm-axis-top">Predicted</div>
+          <div class="cm-axis-left">Actual</div>
+          <div class="cm-grid" id="cm-grid"></div>
+        </div>
+      </section>
+
+      <!-- 6. Prediction form -->
+      <section class="glass card" id="predict-card">
+        <h2>Check Loan Eligibility</h2>
+        <form id="predict-form" novalidate>
+          <div class="form-grid">
+            <label class="field">
+              <span>Applicant Income</span>
+              <input type="number" name="ApplicantIncome" min="0" step="any" placeholder="e.g. 4500">
+            </label>
+            <label class="field">
+              <span>Coapplicant Income</span>
+              <input type="number" name="CoapplicantIncome" min="0" step="any" placeholder="e.g. 1500">
+            </label>
+            <label class="field">
+              <span>Loan Amount</span>
+              <input type="number" name="LoanAmount" min="0" step="any" placeholder="e.g. 130">
+            </label>
+            <label class="field">
+              <span>Dependents</span>
+              <select name="Dependents">
+                <option value="0">0</option>
+                <option value="1">1</option>
+                <option value="2">2</option>
+                <option value="3">3+</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Credit History</span>
+              <select name="Credit_History">
+                <option value="1">Exists (1)</option>
+                <option value="0">None (0)</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Education</span>
+              <select name="Education">
+                <option value="Graduate">Graduate</option>
+                <option value="Not Graduate">Not Graduate</option>
+              </select>
+            </label>
+            <label class="field">
+              <span>Self Employed</span>
+              <select name="Self_Employed">
+                <option value="No">No</option>
+                <option value="Yes">Yes</option>
+              </select>
+            </label>
+          </div>
+          <button type="submit" class="btn" id="predict-btn">Check Loan Eligibility</button>
+        </form>
+        <!-- Prediction result / error message is rendered here -->
+        <div id="predict-result" class="predict-result" aria-live="polite"></div>
+      </section>
+
+      <!-- 3. Features panel -->
+      <section class="glass card" id="features-card">
+        <h2>Model Features</h2>
+        <div class="features-cols">
+          <div>
+            <h3>Number Features</h3>
+            <ul class="chip-list" id="number-features"></ul>
+          </div>
+          <div>
+            <h3>Text Features</h3>
+            <ul class="chip-list" id="text-features"></ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- 5. Model details -->
+      <section class="glass card" id="details-card">
+        <h2>Model Details</h2>
+        <dl class="details-list">
+          <div><dt>File name</dt><dd id="info-file">—</dd></div>
+          <div><dt>Classes</dt><dd id="info-classes">—</dd></div>
+          <div><dt>Algorithm</dt><dd>SVC</dd></div>
+          <div><dt>Kernel</dt><dd>linear</dd></div>
+          <div><dt>class_weight</dt><dd>balanced</dd></div>
+          <div><dt>scikit-learn</dt><dd>1.7.2</dd></div>
+        </dl>
+      </section>
+
+      <!-- 4. Sample rows table -->
+      <section class="glass card card-wide" id="samples-card">
+        <h2>Sample Applicants</h2>
+        <div class="table-scroll">
+          <table class="samples-table">
+            <thead>
+              <tr>
+                <th>Dependents</th>
+                <th>Applicant Income</th>
+                <th>Coapplicant Income</th>
+                <th>Loan Amount</th>
+                <th>Credit History</th>
+                <th>Education</th>
+                <th>Self Employed</th>
+                <th>Loan Status</th>
+              </tr>
+            </thead>
+            <tbody id="samples-body"></tbody>
+          </table>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
